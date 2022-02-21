@@ -4,14 +4,14 @@ import net.atopecode.pisthorioc.dependencyfactory.DependencyFactory;
 import net.atopecode.pisthorioc.exceptions.*;
 import net.atopecode.pisthorioc.ioccontainer.IocContainer;
 import net.atopecode.pisthorioc.ioccontainer.IocContainerFactory;
+import net.atopecode.pisthorioctest.dependencies.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pisthorioctest.dependencies.*;
-import pisthorioctest.dependencies.interfaces.Controller;
-import pisthorioctest.dependencies.interfaces.IRepository;
-import pisthorioctest.dependencies.interfaces.IService;
+import net.atopecode.pisthorioctest.dependencies.interfaces.Controller;
+import net.atopecode.pisthorioctest.dependencies.interfaces.IRepository;
+import net.atopecode.pisthorioctest.dependencies.interfaces.IService;
 
 import static org.junit.jupiter.api.Assertions.*;
 

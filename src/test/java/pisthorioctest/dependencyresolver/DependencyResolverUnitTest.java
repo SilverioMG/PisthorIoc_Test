@@ -4,7 +4,7 @@ import net.atopecode.pisthorioc.dependencyresolver.DependencyResolver;
 import net.atopecode.pisthorioc.exceptions.IocDependencyException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import pisthorioctest.dependencies.Repository1;
+import net.atopecode.pisthorioctest.dependencies.Repository1;
 
 import java.util.HashMap;
 
