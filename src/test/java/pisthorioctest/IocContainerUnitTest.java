@@ -94,7 +94,6 @@ public class IocContainerUnitTest {
                         REPOSITORY1,
                         (dr) -> new Repository1())
                 .register(
-
                         SERVICE1,
                         (dr) -> new Service1(iocContainer.resolve(REPOSITORY1, Repository1.class))
                 );
@@ -436,11 +435,34 @@ public class IocContainerUnitTest {
     }
 
     @Test
+    @DisplayName("Se prueba la carga automática de todas las dependencias correctamente registradas. Las dependencias se registras como 'singleton'.")
+    public void loadContentWithDependenciesRegisteredSingletonOkDefaultParams(){
+        IocContainer iocContainer= getNewContainerWithAllDepenciesRegistered(DependencyFactory.DependencyType.SINGLETON, LOGGER)
+                .loadContent();
+
+        Controller controller1 = iocContainer.resolve(CONTROLLER, Controller.class);
+        Controller controller2 = iocContainer.resolve(CONTROLLER, Controller.class);
+        assertEquals(controller1, controller2);
+    }
+
+    @Test
     @DisplayName("Se prueba la carga automática de todas las dependencias correctamente registradas. Las dependencias se registras como 'singleton'." +
             "No se utiliza 'Logger' al crear la instancia de 'IocContainer' por lo que el funcionamiento debe ser el mismo pero si mostrar mensajes de Log.")
     public void loadContentWithDependenciesRegisteredSingletonOkWithoutLogger(){
         IocContainer iocContainer= getNewContainerWithAllDepenciesRegistered(DependencyFactory.DependencyType.SINGLETON, null)
                 .loadContent(true, true);
+
+        Controller controller1 = iocContainer.resolve(CONTROLLER, Controller.class);
+        Controller controller2 = iocContainer.resolve(CONTROLLER, Controller.class);
+        assertEquals(controller1, controller2);
+    }
+
+    @Test
+    @DisplayName("Se prueba la carga automática de todas las dependencias correctamente registradas. Las dependencias se registras como 'singleton'." +
+            "No se utiliza 'Logger' al crear la instancia de 'IocContainer' por lo que el funcionamiento debe ser el mismo pero si mostrar mensajes de Log.")
+    public void loadContentWithDependenciesRegisteredSingletonOkWithoutLoggerDefaultParams(){
+        IocContainer iocContainer= getNewContainerWithAllDepenciesRegistered(DependencyFactory.DependencyType.SINGLETON, null)
+                .loadContent();
 
         Controller controller1 = iocContainer.resolve(CONTROLLER, Controller.class);
         Controller controller2 = iocContainer.resolve(CONTROLLER, Controller.class);
@@ -459,11 +481,34 @@ public class IocContainerUnitTest {
     }
 
     @Test
+    @DisplayName("Se prueba la carga automática de todas las dependencias correctamente registradas. Las dependencias se registran como 'prototype'.")
+    public void loadContentWithDependenciesRegisteredPrototypeOkDefaultParams(){
+        IocContainer iocContainer= getNewContainerWithAllDepenciesRegistered(DependencyFactory.DependencyType.PROTOTYPE, LOGGER)
+                .loadContent();
+
+        Controller controller1 = iocContainer.resolve(CONTROLLER, Controller.class);
+        Controller controller2 = iocContainer.resolve(CONTROLLER, Controller.class);
+        assertNotEquals(controller1, controller2);
+    }
+
+    @Test
     @DisplayName("Se prueba la carga automática de todas las dependencias correctamente registradas. Las dependencias se registran como 'prototype'." +
             "No se utiliza 'Logger' al crear la instancia de 'IocContainer' por lo que el funcionamiento debe ser el mismo pero si mostrar mensajes de Log.")
     public void loadContentWithDependenciesRegisteredPrototypeOkWithoutLogger(){
         IocContainer iocContainer= getNewContainerWithAllDepenciesRegistered(DependencyFactory.DependencyType.PROTOTYPE, null)
                 .loadContent(true, true);
+
+        Controller controller1 = iocContainer.resolve(CONTROLLER, Controller.class);
+        Controller controller2 = iocContainer.resolve(CONTROLLER, Controller.class);
+        assertNotEquals(controller1, controller2);
+    }
+
+    @Test
+    @DisplayName("Se prueba la carga automática de todas las dependencias correctamente registradas. Las dependencias se registran como 'prototype'." +
+            "No se utiliza 'Logger' al crear la instancia de 'IocContainer' por lo que el funcionamiento debe ser el mismo pero si mostrar mensajes de Log.")
+    public void loadContentWithDependenciesRegisteredPrototypeOkWithoutLoggerDefaultParams(){
+        IocContainer iocContainer= getNewContainerWithAllDepenciesRegistered(DependencyFactory.DependencyType.PROTOTYPE, null)
+                .loadContent();
 
         Controller controller1 = iocContainer.resolve(CONTROLLER, Controller.class);
         Controller controller2 = iocContainer.resolve(CONTROLLER, Controller.class);
