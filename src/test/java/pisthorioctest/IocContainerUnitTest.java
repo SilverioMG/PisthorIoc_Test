@@ -32,24 +32,40 @@ public class IocContainerUnitTest {
     @DisplayName("Comprobación de la creación de IocContainer por medio de la Factory para nuevas instancias y singletons.")
     public void createIocContainerNewInstanceAndSingletonFromFactory() {
         //Se comprueban las direcciones de memoria de los Objetos:
-        IocContainer containerNewInstance1 = IocContainerFactory.newInstance(null);
-        IocContainer containerNewInstance2 = IocContainerFactory.newInstance(null);
+        IocContainer containerNewInstance1 = IocContainerFactory.newInstance();
+        IocContainer containerNewInstance2 = IocContainerFactory.newInstance();
         assertTrue(containerNewInstance1 != containerNewInstance2);
 
-        IocContainer containerSingleton1 = IocContainerFactory.singleton(null);
-        IocContainer containerSingleton2 = IocContainerFactory.singleton(null);
+        IocContainer containerSingleton1 = IocContainerFactory.singleton();
+        IocContainer containerSingleton2 = IocContainerFactory.singleton();
         assertTrue(containerSingleton1 == containerSingleton2);
 
         assertTrue((containerNewInstance1 != containerSingleton1) && (containerNewInstance2 != containerSingleton1));
+
+        //Si a la instancia singleton se le asigna un 'logger', no se puede volver asignarle otro.
+        containerSingleton1.setLogger(LOGGER);
+        assertThrows(IocDependencyException.class, () -> {
+           IocContainer containerSingleton3 = IocContainerFactory.singleton()
+                   .setLogger(null);
+        });
+        assertThrows(IocDependencyException.class, () -> {
+            IocContainer containerSingleton3 = IocContainerFactory.singleton()
+                    .setLogger(LoggerFactory.getLogger(IocContainerUnitTest.class));
+        });
+
+        assertNotNull(IocContainerFactory.singleton());
+        assertEquals(IocContainerFactory.singleton(), containerSingleton1);
     }
+
+
 
     @Test
     @DisplayName("Registrando un objeto con un nombre no normalizado y recuperándolo.")
-    public void checkRegistreAndResolveNormalizeName() {
+    public void checkRegisterAndResolveNormalizeName() {
         String dependencyName = "Dependency 1";
         String normalizedDependencyName = dependencyName.trim().toLowerCase();
 
-        IocContainer iocContainer = IocContainerFactory.newInstance(LOGGER);
+        IocContainer iocContainer = IocContainerFactory.newInstance().setLogger(LOGGER);
         IRepository repository1 = iocContainer.register(dependencyName, (dr) -> new Repository1())
                 .resolve(dependencyName, Repository1.class);
 
@@ -63,7 +79,7 @@ public class IocContainerUnitTest {
     @Test
     @DisplayName("Registrando como singleton y resolviendo un objeto que no tiene más dependencias.")
     public void resolveObjectWithoutDependenciesSingleton() {
-        IocContainer iocContainer = IocContainerFactory.newInstance(LOGGER);
+        IocContainer iocContainer = IocContainerFactory.newInstance().setLogger(LOGGER);
         iocContainer.register(
                 REPOSITORY1,
                 DependencyFactory.DependencyType.SINGLETON,
@@ -88,7 +104,7 @@ public class IocContainerUnitTest {
     @Test
     @DisplayName("Registrando como singleton y resolviendo un objeto que tiene 1 dependencia.")
     public void resolveObjectWithOneDependencySingleton() {
-        IocContainer iocContainer = IocContainerFactory.newInstance(LOGGER);
+        IocContainer iocContainer = IocContainerFactory.newInstance().setLogger(LOGGER);
         iocContainer
                 .register(
                         REPOSITORY1,
@@ -110,7 +126,7 @@ public class IocContainerUnitTest {
     @Test
     @DisplayName("Registrando como singleton y resolviendo un objeto que tiene más de 1 dependencia.")
     public void resolveObjectWithMoreOneDepedencySingleton() {
-        IocContainer iocContainer = IocContainerFactory.newInstance(LOGGER);
+        IocContainer iocContainer = IocContainerFactory.newInstance().setLogger(LOGGER);
         iocContainer
                 .register(
                         REPOSITORY1,
@@ -163,7 +179,7 @@ public class IocContainerUnitTest {
     @Test
     @DisplayName("Registrando como prototype y resolviendo un objeto que no tiene más dependencias.")
     public void resolveObjectWithoutDependenciesPrototype() {
-        IocContainer iocContainer = IocContainerFactory.newInstance(LOGGER);
+        IocContainer iocContainer = IocContainerFactory.newInstance().setLogger(LOGGER);
         iocContainer.register(
                 REPOSITORY1,
                 DependencyFactory.DependencyType.PROTOTYPE,
@@ -184,7 +200,7 @@ public class IocContainerUnitTest {
     @Test
     @DisplayName("Registrando como prototype un objeto y como singleton el objeto en el que se inyecta.")
     public void resolvePrototypeObjectIntoSingletonObject() {
-        IocContainer iocContainer = IocContainerFactory.newInstance(LOGGER);
+        IocContainer iocContainer = IocContainerFactory.newInstance().setLogger(LOGGER);
         iocContainer
                 .register(
                         REPOSITORY1,
@@ -211,7 +227,7 @@ public class IocContainerUnitTest {
     @Test
     @DisplayName("Registrando como singleton un objeto y como prototype el objeto en el que se inyecta.")
     public void resolveSingletonObjectIntoPrototypeObject() {
-        IocContainer iocContainer = IocContainerFactory.newInstance(LOGGER);
+        IocContainer iocContainer = IocContainerFactory.newInstance().setLogger(LOGGER);
         iocContainer
                 .register(
                         REPOSITORY1,
@@ -238,7 +254,7 @@ public class IocContainerUnitTest {
     @Test
     @DisplayName("Se registra un objeto antes que sus dependencias.")
     public void registerObjectBeforeDependencies() {
-        IocContainer iocContainer = IocContainerFactory.newInstance(LOGGER);
+        IocContainer iocContainer = IocContainerFactory.newInstance().setLogger(LOGGER);
         iocContainer
                 .register(
                         SERVICE1,
@@ -257,7 +273,7 @@ public class IocContainerUnitTest {
     @Test
     @DisplayName("Se intenta registrar 2 veces un factory con el mismo nombre.")
     public void registerMultipleTimesSameFactoryName() {
-        IocContainer iocContainer = IocContainerFactory.newInstance(LOGGER);
+        IocContainer iocContainer = IocContainerFactory.newInstance().setLogger(LOGGER);
         iocContainer
                 .register(
                         REPOSITORY1,
@@ -279,7 +295,7 @@ public class IocContainerUnitTest {
     "'IocContainer'. El funcionamiento debe ser el mismo solo que no se muestra mensaje de log avisando de la sobreescritura del " +
     "registro de la dependencia.")
     public void registerMultipleTimesSameFactoryNameButWithoutLogger() {
-        IocContainer iocContainer = IocContainerFactory.newInstance(null);
+        IocContainer iocContainer = IocContainerFactory.newInstance();
         iocContainer
                 .register(
                         REPOSITORY1,
@@ -299,7 +315,7 @@ public class IocContainerUnitTest {
     @Test
     @DisplayName("Se intenta registrar una dependencia enviando como parámetro 'DependencyFactory' a 'null'.")
     public void registerWithParametersNullOrEmpty(){
-        IocContainer iocContainer = IocContainerFactory.newInstance(LOGGER);
+        IocContainer iocContainer = IocContainerFactory.newInstance().setLogger(LOGGER);
         assertThrows(IocDependencyException.class, () -> {
             iocContainer.register(null, null);
         });
@@ -344,7 +360,7 @@ public class IocContainerUnitTest {
     @Test
     @DisplayName("Se intenta resolver una dependencia enviando los parámetros 'name' y/o 'classObject' a 'null'.")
     public void resolveWithParametersNull(){
-        IocContainer iocContainer = IocContainerFactory.newInstance(LOGGER)
+        IocContainer iocContainer = IocContainerFactory.newInstance().setLogger(LOGGER)
                 .<IRepository>register(
                         REPOSITORY1,
                         (dr) -> new Repository1()
@@ -391,7 +407,7 @@ public class IocContainerUnitTest {
     }
 
     private IocContainer getNewContainerWithAllDepenciesRegistered(DependencyFactory.DependencyType dependencyType, Logger logger) {
-        return IocContainerFactory.newInstance(logger)
+        return IocContainerFactory.newInstance().setLogger(LOGGER)
                 .<IRepository>register(
                                 REPOSITORY1,
                                 dependencyType,
@@ -518,7 +534,7 @@ public class IocContainerUnitTest {
     @Test
     @DisplayName("Se prueba la carga automática de todas las dependencias correctamente registradas. Las dependencias se registran como 'singleton' y 'prototype'.")
     public void loadContentWithDependenciesRegisteredSingletonAndPrototypeOk(){
-        IocContainer iocContainer= IocContainerFactory.newInstance(LOGGER)
+        IocContainer iocContainer= IocContainerFactory.newInstance().setLogger(LOGGER)
                 .register(
                         REPOSITORY1,
                         DependencyFactory.DependencyType.SINGLETON,
@@ -539,7 +555,7 @@ public class IocContainerUnitTest {
         assertNotEquals(service1, service1Prototype);
         assertEquals(service1.getRepositories().get(0), service1Prototype.getRepositories().get(0));
 
-        iocContainer= IocContainerFactory.newInstance(LOGGER)
+        iocContainer= IocContainerFactory.newInstance().setLogger(LOGGER)
                 .register(
                         REPOSITORY1,
                         DependencyFactory.DependencyType.PROTOTYPE,
@@ -565,7 +581,7 @@ public class IocContainerUnitTest {
     @Test
     @DisplayName("Se prueba la carga automática de dependencias que no han sido registradas.")
     public void loadContentWithDependenciesNotRegistered(){
-        IocContainer iocContainer = IocContainerFactory.newInstance(LOGGER);
+        IocContainer iocContainer = IocContainerFactory.newInstance().setLogger(LOGGER);
         iocContainer
                 .register(
                     REPOSITORY1,
@@ -586,7 +602,7 @@ public class IocContainerUnitTest {
     @Test
     @DisplayName("Se prueba la carga automática de dependencias circulares registradas.")
     public void loadContentWithCircularDependencies(){
-        IocContainer iocContainer = IocContainerFactory.newInstance(LOGGER);
+        IocContainer iocContainer = IocContainerFactory.newInstance().setLogger(LOGGER);
         iocContainer
                 .register(
                         SERVICE_CIRCULAR1,
@@ -608,7 +624,7 @@ public class IocContainerUnitTest {
     @DisplayName("Se prueba la carga automática de dependencias inyectando en el constructor de una de ellas una dependencia " +
     "con tipo de dato incompatible con el esperado (no se puede hacer casting).")
     public void loadContentWithIncompatibleDependencyClassInConstructorInjection(){
-        IocContainer iocContainer = IocContainerFactory.newInstance(LOGGER);
+        IocContainer iocContainer = IocContainerFactory.newInstance().setLogger(LOGGER);
         iocContainer
                 .register(
                         REPOSITORY1,
@@ -634,7 +650,7 @@ public class IocContainerUnitTest {
             "se comprueba que a la hora de resolver dichas dependencias se produce una 'IocCircularDependencyException' " +
             "(en caso contrario se produciría un bucle infinito o 'StackOverflowException' de Java).")
     public void registerCircularDependenciesAndTryToResolve() {
-        IocContainer iocContainer = IocContainerFactory.newInstance(LOGGER);
+        IocContainer iocContainer = IocContainerFactory.newInstance().setLogger(LOGGER);
         iocContainer
                 .register(
                         SERVICE_CIRCULAR1,
@@ -738,12 +754,12 @@ public class IocContainerUnitTest {
     @DisplayName("Se intenta resolver una dependencia que no se ha registrado previamente.")
     public void resolveDependencyNotRegistered() {
         assertThrows(IocDependencyFactoryNotFoundException.class, () -> {
-            IocContainer iocContainer = IocContainerFactory.newInstance(LOGGER);
+            IocContainer iocContainer = IocContainerFactory.newInstance().setLogger(LOGGER);
             iocContainer.resolve(REPOSITORY1, Repository1.class);
         });
 
         assertThrows(IocDependencyFactoryNotFoundException.class, () -> {
-            IocContainer iocContainer = IocContainerFactory.newInstance(LOGGER);
+            IocContainer iocContainer = IocContainerFactory.newInstance().setLogger(LOGGER);
             iocContainer
                     .register(
                             REPOSITORY1,
@@ -759,7 +775,7 @@ public class IocContainerUnitTest {
     @DisplayName("Se intenta resolver una dependencia que se ha registrado previamente pero con valor a 'null'.")
     public void resolveDependencyRegisteredWithNullValue() {
         assertThrows(IocDependencyNotFoundException.class, () -> {
-            IocContainer iocContainer = IocContainerFactory.newInstance(LOGGER);
+            IocContainer iocContainer = IocContainerFactory.newInstance().setLogger(LOGGER);
             iocContainer.register(
                     REPOSITORY1,
                     (dr) -> null);
@@ -767,7 +783,7 @@ public class IocContainerUnitTest {
         });
 
         assertThrows(IocDependencyNotFoundException.class, () -> {
-            IocContainer iocContainer = IocContainerFactory.newInstance(LOGGER);
+            IocContainer iocContainer = IocContainerFactory.newInstance().setLogger(LOGGER);
             iocContainer
                     .register(
                         REPOSITORY1,
@@ -780,7 +796,7 @@ public class IocContainerUnitTest {
         });
 
         assertThrows(IocDependencyNotFoundException.class, () -> {
-            IocContainer iocContainer = IocContainerFactory.newInstance(LOGGER);
+            IocContainer iocContainer = IocContainerFactory.newInstance().setLogger(LOGGER);
             iocContainer
                     .register(
                             REPOSITORY1,
@@ -792,7 +808,7 @@ public class IocContainerUnitTest {
         });
 
         assertThrows(IocDependencyNotFoundException.class, () -> {
-            IocContainer iocContainer = IocContainerFactory.newInstance(LOGGER);
+            IocContainer iocContainer = IocContainerFactory.newInstance().setLogger(LOGGER);
             iocContainer
                     .register(
                             REPOSITORY1,
@@ -811,7 +827,7 @@ public class IocContainerUnitTest {
     @DisplayName("Se registra una dependencia con un tipo de clase y se resuelve como objeto de la misma clase o de una clase/interfaz " +
             "de la que hereda para  comprobar que se realiza el casting correctamente.")
     public void resolveRegisteredObjectIntoObjectSameClassOrParentClass(){
-        IocContainer iocContainer = IocContainerFactory.newInstance(LOGGER);
+        IocContainer iocContainer = IocContainerFactory.newInstance().setLogger(LOGGER);
         iocContainer
                 .register(
                         REPOSITORY1,
@@ -835,7 +851,7 @@ public class IocContainerUnitTest {
     @DisplayName("Se registra una dependencia con un tipo de clase y se intenta resolver como un objeto con un tipo de clase incompatible " +
             "en la que no se puede hacer 'casting' (no hereda de esa clase o no implementa dicha interfaz).")
     public void resolveRegisteredObjectIntoOtherObjectType(){
-        IocContainer iocContainer = IocContainerFactory.newInstance(LOGGER);
+        IocContainer iocContainer = IocContainerFactory.newInstance().setLogger(LOGGER);
         iocContainer
                 .register(
                         REPOSITORY1,
@@ -864,7 +880,7 @@ public class IocContainerUnitTest {
             "en la que no se puede hacer 'casting' (no hereda de esa clase o no implementa dicha interfaz) a la hora de inyectarlo via constructor " +
             "en otra dependencia.")
     public void resolveRegisteredObjectIntoOtherObjectTypeWhenConstructorInjection(){
-        IocContainer iocContainer = IocContainerFactory.newInstance(LOGGER);
+        IocContainer iocContainer = IocContainerFactory.newInstance().setLogger(LOGGER);
         iocContainer
                 .<IRepository>register(
                         REPOSITORY1,
