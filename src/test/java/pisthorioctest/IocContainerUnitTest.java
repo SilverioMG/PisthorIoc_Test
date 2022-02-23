@@ -76,6 +76,16 @@ public class IocContainerUnitTest {
     }
 
     @Test
+    @DisplayName("Se crea una nueva instancia de 'IocContainer', y se comprueba si tiene logger asignado o no.")
+    public void createIocContainerNewInstanceAndCheckIfHasoggerAssigned(){
+        IocContainer iocContainer = IocContainerFactory.newInstance();
+        assertFalse(iocContainer.hasLogger());
+
+        iocContainer.setLogger(LOGGER);
+        assertTrue(iocContainer.hasLogger());
+    }
+
+    @Test
     @DisplayName("Registrando un objeto con un nombre no normalizado y recuperándolo.")
     public void checkRegisterAndResolveNormalizeName() {
         String dependencyName = "Dependency 1";
