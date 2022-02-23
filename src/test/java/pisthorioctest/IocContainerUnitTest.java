@@ -57,7 +57,23 @@ public class IocContainerUnitTest {
         assertEquals(IocContainerFactory.singleton(), containerSingleton1);
     }
 
+    @Test
+    @DisplayName("Creando nuevas instancias de 'IocContainer' y comprobando que si una instancia ya tiene un 'logger' "
+    + " asignado no se le puede asignar otro.")
+    public void createIocContainerNewInstanceAndTryToAssignNewLogger(){
+        IocContainer iocContainer = IocContainerFactory.newInstance();
+        iocContainer.setLogger(null);
 
+        iocContainer.setLogger(LOGGER);
+
+        assertThrows(IocDependencyException.class, () -> {
+           iocContainer.setLogger(null);
+        });
+
+        assertThrows(IocDependencyException.class, () -> {
+            iocContainer.setLogger(LOGGER);
+        });
+    }
 
     @Test
     @DisplayName("Registrando un objeto con un nombre no normalizado y recuperándolo.")
@@ -407,7 +423,7 @@ public class IocContainerUnitTest {
     }
 
     private IocContainer getNewContainerWithAllDepenciesRegistered(DependencyFactory.DependencyType dependencyType, Logger logger) {
-        return IocContainerFactory.newInstance().setLogger(LOGGER)
+        return IocContainerFactory.newInstance().setLogger(logger)
                 .<IRepository>register(
                                 REPOSITORY1,
                                 dependencyType,
