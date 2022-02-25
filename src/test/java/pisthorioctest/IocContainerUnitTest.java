@@ -27,6 +27,7 @@ public class IocContainerUnitTest {
     public final static String SERVICE_CIRCULAR1 = "serviceCircular1";
     public final static String SERVICE_CIRCULAR2 = "serviceCircular2";
     public final static String SERVICE_CIRCULAR3 ="serviceCircular3";
+    public final static String REPOSITORY_MOCK = "repository_mock";
 
     @Test
     @DisplayName("Comprobación de la creación de IocContainer por medio de la Factory para nuevas instancias y singletons.")
@@ -666,6 +667,83 @@ public class IocContainerUnitTest {
         assertThrows(IocDependencyCastingException.class, () -> {
             iocContainer.loadContent(true, true);
         });
+    }
+
+    @Test
+    @DisplayName("Se registran varias dependencias en el contenedor y se sobreescribe una por un mock.")
+    public void overrideDependencyRegistrationOk(){
+        IocContainer iocContainer = IocContainerFactory.newInstance().setLogger(LOGGER)
+                .register(
+                        REPOSITORY1,
+                        (dr) -> new Repository1()
+                )
+                .register(
+                        SERVICE1,
+                        (dr) -> new Service1(dr.resolve(REPOSITORY1, IRepository.class))
+                )
+                .register(
+                        REPOSITORY1,
+                        (dr) -> new RepositoryMock());
+
+        IRepository repository = iocContainer.resolve(REPOSITORY1, IRepository.class);
+        assertNotNull(repository);
+        assertFalse(repository instanceof Repository1);
+        assertTrue(repository instanceof RepositoryMock);
+    }
+
+    @Test
+    @DisplayName("Se registran varias dependencias en el contenedor y se sobreescribe una por un mock después de haber " +
+    "realizado la carga automática de las dependencias previamente registradas. El resultado es que como ya se ha guarado " +
+    "un objeto dentro del contenedor de la dependencia que se quiere sobreescribir, cuando se intente resolver, se devolverá " +
+    "el objeto registrado antes de hacer la carga automática, en vez del mock que se registra posteriormente de hacer la carga " +
+    "automática.")
+    public void overrideDependencyRegistrationLoadingContentBeforeOverrideRegisterBehaviorNotExpected(){
+        IocContainer iocContainer = IocContainerFactory.newInstance().setLogger(LOGGER)
+                .register(
+                        REPOSITORY1,
+                        (dr) -> new Repository1()
+                )
+                .register(
+                        SERVICE1,
+                        (dr) -> new Service1(dr.resolve(REPOSITORY1, IRepository.class))
+                )
+                .loadContent();
+
+        iocContainer
+                .register(
+                        REPOSITORY1,
+                        (dr) -> new RepositoryMock());
+
+        IRepository repository = iocContainer.resolve(REPOSITORY1, IRepository.class);
+        assertNotNull(repository);
+        assertTrue(repository instanceof Repository1);
+        assertFalse(repository instanceof RepositoryMock);
+    }
+
+    @Test
+    @DisplayName("Se registran varias dependencias en el contenedor y se sobreescribe una por un mock." +
+    "A la hora de resolver, en vez de indicar como parámetro '.class' la interfaz común a ambas dependencias, "+
+    "se indica como parámetro '.class' la clase del primer objeto registrado. El resultado debe ser que no se puede "+
+    "hacer el casting cuando se intente resolver la dependencia por su mock en vez de por objeto registrado incialmente.")
+    public void overrideDependencyRegistrationAndResolvingWithClassOfFirstObjectRegisteredInsteadOfTheCommonInterface(){
+        IocContainer iocContainer = IocContainerFactory.newInstance().setLogger(LOGGER)
+                .register(
+                        REPOSITORY1,
+                        (dr) -> new Repository1()
+                )
+                .register(
+                        SERVICE1,
+                        (dr) -> new Service1(dr.resolve(REPOSITORY1, IRepository.class))
+                )
+                .register(
+                        REPOSITORY1,
+                        (dr) -> new RepositoryMock());
+
+        assertThrows(IocDependencyCastingException.class, () -> {
+            IRepository repository = iocContainer.resolve(REPOSITORY1, Repository1.class);
+        });
+
+        assertNotNull(iocContainer.resolve(REPOSITORY1, IRepository.class));
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
