@@ -6,7 +6,7 @@
 
     <groupId>net.atopecode</groupId>
     <artifactId>ClientPistonIoc</artifactId>
-    <version>1.0.1</version>
+    <version>1.2.0</version>
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
@@ -17,7 +17,7 @@
         <dependency>
             <groupId>net.atopecode</groupId>
             <artifactId>pisthorioc</artifactId>
-            <version>1.0.0</version>
+            <version>1.2.0</version>
         </dependency>
 
         <!--Logging implementation for SLF4F:-->

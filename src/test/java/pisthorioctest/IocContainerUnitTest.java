@@ -433,7 +433,7 @@ public class IocContainerUnitTest {
         iocContainer.showContent();
     }
 
-    private IocContainer getNewContainerWithAllDepenciesRegistered(DependencyFactory.DependencyType dependencyType, Logger logger) {
+    public static IocContainer getNewContainerWithAllDepenciesRegistered(DependencyFactory.DependencyType dependencyType, Logger logger) {
         return IocContainerFactory.newInstance().setLogger(logger)
                 .<IRepository>register(
                                 REPOSITORY1,
